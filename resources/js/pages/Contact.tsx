@@ -1,0 +1,50 @@
+import { AppIcon } from "@/components/AppIcon";
+import type { IconName } from "@/lib/icons";
+import { Reveal } from "@/components/Reveal";
+import type { ReactNode } from "react";
+import { z } from "zod";
+import { useUrlSearch } from "@/lib/nav";
+import { Button } from "@/components/ui/button";
+import { company } from "@/data/company";
+import { Seo } from "@/components/Seo";
+import { ContactForm } from "@/components/forms/ContactForm";
+
+function InfoCard({ Icon, title, children }: { Icon: IconName; title: string; children: ReactNode }) {
+  return (
+    <Reveal><div className="card-base flex gap-4 p-5">
+      <span className="flex size-11 shrink-0 items-center justify-center rounded-lg bg-safety-100 text-safety-700"><AppIcon name={Icon} size={40} /></span>
+      <div><h2 className="text-base text-navy-900">{title}</h2><div className="mt-1 text-sm text-ink">{children}</div></div>
+    </div></Reveal>
+  );
+}
+
+const contactSearchSchema = z.object({ topic: z.enum(["general", "order", "bulk", "air-quality", "ai-camera"]).optional().catch(undefined) });
+
+export default function Contact() {
+  const [{ topic }] = useUrlSearch(contactSearchSchema);
+  return (
+    <>
+      <Seo title="Contact" description="Contact Safe HR Consultants in Parnell, Auckland by phone, WhatsApp or email." path="/contact" />
+    <div className="container-page py-10 md:py-14">
+      <h1 className="text-4xl text-navy-900 md:text-5xl">Contact us</h1>
+      <p className="mt-2 text-muted-foreground">Questions about products, orders or our technology? We are happy to help.</p>
+      <div className="mt-10 grid gap-10 lg:grid-cols-2">
+        <div className="space-y-4">
+          <InfoCard Icon="address" title="Address">
+            <address className="not-italic">{company.address.full}</address>
+            <Button asChild variant="link" className="h-auto p-0"><a href={company.mapsUrl} target="_blank" rel="noopener noreferrer">Open in Google Maps</a></Button>
+          </InfoCard>
+          <InfoCard Icon="phone" title="Phone"><a href={company.phone.href} className="font-semibold hover:underline">{company.phone.display}</a></InfoCard>
+          <InfoCard Icon="whatsapp" title="WhatsApp"><a href={company.whatsapp.href} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">{company.whatsapp.display}</a></InfoCard>
+          <InfoCard Icon="email" title="Email"><a href={`mailto:${company.email}`} className="break-all font-semibold hover:underline">{company.email}</a></InfoCard>
+          <iframe title={`Map of ${company.address.full}`} src={company.mapsEmbedUrl} loading="lazy" referrerPolicy="no-referrer-when-downgrade" width={600} height={320} className="h-80 w-full rounded-card border border-line" />
+        </div>
+        <div className="card-base h-fit p-6 hover:shadow-none md:p-8">
+          <h2 className="text-2xl text-navy-900">Send an enquiry</h2>
+          <div className="mt-6"><ContactForm key={topic ?? "general"} {...(topic ? { topic } : {})} /></div>
+        </div>
+      </div>
+    </div>
+    </>
+  );
+}
